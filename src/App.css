@@ -1,38 +1,267 @@
 .App {
-  text-align: center;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: rgb(255, 255, 255);
+  transition: background-color 0.3s ease;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+
+.background-model {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Z-index setzen, um das Canvas im Hintergrund zu halten */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.foreground-content {
+  position: relative;
+  z-index: 1; /* Z-index setzen, um den Vordergrund-Inhalt darüber zu halten */
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.header-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 10vw; /* Größe des Textes angepasst */
+  transition: font-size 0.5s, top 0.5s;
+}
+
+.header-container.menu-active {
+  font-size: 5vw; /* Verkleinern der Schriftgröße */
+  top: 2vw; /* Weniger nach oben verschieben */
+}
+
+.scrolling-text {
+  display: inline-block;
+  font-family: Arial, sans-serif; /* Verwenden Sie die importierte Schriftart */
+  position: relative;
+}
+
+.word {
+  display: inline-block;
+  transition: color 1s, -webkit-text-stroke 1s;
+  color: black; /* Default text color */
+  -webkit-text-stroke: 0.2vw black; /* Default outline color */
+}
+
+.word.visible {
+  color: var(--active-color); /* Active color for text */
+  -webkit-text-stroke: 0; /* No outline for active text */
+}
+
+.word.stay-hollow {
+  color: transparent;
+  -webkit-text-stroke: 0.2vw black; /* Always hollow with black outline */
+}
+
+.word.active-outline {
+  color: transparent;
+  -webkit-text-stroke: 0.2vw var(--active-outline-color); /* Outlines in active color */
+}
+
+.main-menu {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: transparent;
+}
+
+.menu-item {
+  flex: 1;
+  background: transparent;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: flex-end; /* Titel am unteren Rand ausrichten */
+  text-align: center;
+  position: relative;
 }
 
-.App-link {
-  color: #61dafb;
+.menu-item:hover {
+  background-color: rgba(var(--hover-color-rgb), 0.5); /* Farbänderung beim Hover mit Transparenz */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.menu-item.active {
+  flex: 8; /* Nimmt mindestens 80% der Breite des Viewports ein */
+  background: rgba(var(--hover-color-rgb), 0.5); /* Farbänderung wie beim Hover */
+}
+
+.menu-title {
+  padding: 20px;
+  font-size: 1.5rem;
+  writing-mode: vertical-rl; /* Vertikaler Text, um horizontal auszusehen */
+  transform: rotate(180deg);
+  transition: font-size 0.5s ease, bottom 0.5s ease, color 0.5s ease;
+  position: absolute;
+  bottom: 0;
+  color: black;
+}
+
+.menu-item:hover .menu-title {
+  bottom: 20px; /* Verschiebe den Titel nach oben beim Hover */
+  color: white; /* Ändere die Schriftfarbe zu Weiß */
+}
+
+.menu-content {
+  display: none;
+  padding: 20px;
+  font-size: 1rem;
+  transition: font-size 0.5s ease;
+}
+
+.menu-item.active .menu-content {
+  display: block;
+}
+
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px; /* Höhe des oberen Farbkastens */
+  background-color: rgba(var(--hover-color-rgb), 1);
+  z-index: 2;
+}
+
+/* Spezifische Farben für jeden Menüpunkt */
+.menu-item:nth-child(1) {
+  --hover-color-rgb: 57, 255, 20; /* Neon grün */
+}
+
+.menu-item:nth-child(2) {
+  --hover-color-rgb: 0, 255, 255; /* Neon cyan */
+}
+
+.menu-item:nth-child(3) {
+  --hover-color-rgb: 255, 7, 58; /* Neon rot */
+}
+
+.menu-item:nth-child(4) {
+  --hover-color-rgb: 255, 0, 255; /* Neon pink */
+}
+
+.menu-item:nth-child(5) {
+  --hover-color-rgb: 255, 255, 0; /* Neon gelb */
+}
+
+.menu-item:nth-child(6) {
+  --hover-color-rgb: 0, 255, 0; /* Neon grün */
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 1200px) {
+  .menu-item.active {
+    flex: 10;
   }
-  to {
-    transform: rotate(360deg);
+
+  .menu-title {
+    font-size: 1.3rem;
+  }
+
+  .menu-content {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .menu-item.active {
+    flex: 12;
+  }
+
+  .menu-title {
+    font-size: 1.2rem;
+  }
+
+  .menu-content {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-item.active {
+    flex: 14;
+  }
+
+  .menu-title {
+    font-size: 1.1rem;
+  }
+
+  .menu-content {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .menu-item.active {
+    flex: 16;
+  }
+
+  .menu-title {
+    font-size: 1rem;
+  }
+
+  .menu-content {
+    font-size: 0.7rem;
+  }
+}
+
+
+
+
+.animated-shape-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1; /* Stelle sicher, dass das SVG im Hintergrund ist */
+}
+
+.animated-shape {
+  width: 100%;
+  height: 100%;
+  transform: scale(var(--shape-scale));
+  position: absolute; /* Positionieren der SVG absolut, um Verschiebungen zu ermöglichen */
+  transition: left 0.5s ease-in-out; /* Weicher Übergang beim Verschieben */
+}
+
+
+
+@media (max-aspect-ratio: 1/1) {
+  :root {
+    --shape-scale: 1.5;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) {
+  :root {
+    --shape-scale: 1;
   }
 }
