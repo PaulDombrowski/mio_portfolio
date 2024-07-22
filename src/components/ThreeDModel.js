@@ -4,7 +4,7 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 const Model = ({ color, scale }) => {
-  const { scene } = useGLTF('/spiral.glb');
+  const { scene } = useGLTF(`${process.env.PUBLIC_URL}/spiral.glb`);
   const modelRef = useRef();
 
   useEffect(() => {
@@ -53,7 +53,8 @@ const Model = ({ color, scale }) => {
 
 const ResponsiveModel = ({ color, isMenuActive }) => {
   const { size } = useThree();
-  const scale = size.width / 2000; // Skalierung basierend auf der Breite des Fensters
+  const maxScale = 600 / 2000; // Maximale Skalierung bei einer Breite von 600 Pixeln
+  const scale = Math.min(size.width / 2000, maxScale); // Skalierung basierend auf der Breite des Fensters, aber maximal 600 Pixel
 
   const displayColor = isMenuActive ? '#ffffff' : color; // Weiß, wenn Menü aktiv ist, sonst die übergebene Farbe
 
@@ -79,6 +80,6 @@ const ThreeDModel = ({ color, isMenuActive }) => {
   );
 };
 
-useGLTF.preload('/spiral.glb');
+useGLTF.preload(`${process.env.PUBLIC_URL}/spiral.glb`);
 
 export default ThreeDModel;
