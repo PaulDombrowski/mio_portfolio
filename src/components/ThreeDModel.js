@@ -14,8 +14,9 @@ const Model = ({ color, scale }) => {
       box.getCenter(center);
       scene.position.sub(center);
 
-      // Einmalige Anfangsrotation und feste Skalierung
-      scene.rotation.set(Math.PI / 4, Math.PI / 4, Math.PI / 4);
+      // Einmalige feste Skalierung ohne Rotation
+      scene.position.set(0, 0, 0); // Positioniere das Modell in der Mitte
+      scene.rotation.set(0, 0, 0); // Keine Anfangsrotation
       scene.scale.set(scale, scale, scale); // Skalierung basierend auf der Fenstergröße
 
       scene.traverse((child) => {
@@ -42,9 +43,9 @@ const Model = ({ color, scale }) => {
 
   useFrame(() => {
     if (modelRef.current) {
-      modelRef.current.rotation.y += 0.001;
-      modelRef.current.rotation.x += 0.0005;
-      modelRef.current.rotation.z += 0.0005;
+      modelRef.current.rotation.y += 0.0005; // Langsame Rotation um die Y-Achse
+      modelRef.current.rotation.z += 0.0005; // Zusätzliche langsame Rotation um die Z-Achse
+      modelRef.current.rotation.x += 0.0005; // Zusätzliche langsame Rotation um die X-Achse
     }
   });
 
@@ -52,11 +53,19 @@ const Model = ({ color, scale }) => {
 };
 
 const ResponsiveModel = ({ color, isMenuActive }) => {
-  const { size } = useThree();
-  const maxScale = 600 / 2000; // Maximale Skalierung bei einer Breite von 600 Pixeln
-  const scale = Math.min(size.width / 2000, maxScale); // Skalierung basierend auf der Breite des Fensters, aber maximal 600 Pixel
+  const { size, invalidate } = useThree();
+  const baseScale = 2; // Reduzierte Basis-Skalierung, um das Modell etwas kleiner zu machen
+  const scaleFactor = Math.min(size.width / 2000, size.height / 2000); // Minimaler Skalierungsfaktor
+  const scale = baseScale * (scaleFactor > 0.5 ? scaleFactor : 0.5); // Verhindere zu kleine Skalierung
 
   const displayColor = isMenuActive ? '#ffffff' : color; // Weiß, wenn Menü aktiv ist, sonst die übergebene Farbe
+
+  useEffect(() => {
+    // Forciert ein erneutes Rendern nach der ersten Anzeige
+    setTimeout(() => {
+      invalidate();
+    }, 100);
+  }, [invalidate]);
 
   return <Model color={displayColor} scale={scale} />;
 };
@@ -64,7 +73,7 @@ const ResponsiveModel = ({ color, isMenuActive }) => {
 const ThreeDModel = ({ color, isMenuActive }) => {
   return (
     <Canvas
-      camera={{ position: [0, 0, 10] }} // Feste Kamera-Position
+      camera={{ position: [10, 10, 10] }} // Kamera-Position leicht schräg
       gl={{ antialias: true }}
       style={{ width: '100%', height: '100vh' }} // Responsivität sicherstellen
     >
