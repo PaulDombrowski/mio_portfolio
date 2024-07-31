@@ -45,7 +45,11 @@ const Model = ({ color }) => {
       // Nur Farbe bei Änderungen aktualisieren
       scene.traverse((child) => {
         if (child.isMesh) {
-          child.material.color.set(color);
+          child.material = new THREE.MeshStandardMaterial({
+            color: color,
+            transparent: false, // Transparenz ausschalten
+            opacity: 1, // Volle Deckkraft
+          });
         }
       });
     }
@@ -64,11 +68,12 @@ const Model = ({ color }) => {
 const ThreeDModel = ({ color }) => {
   return (
     <Canvas
-      camera={{ position: [20, 20, 20], up: [-2, 0, -3] }}
+      camera={{ position: [23, 20, 20], up: [-2, 0, -6] }}
       style={{ width: '100%', height: '100vh' }}
+     
     >
       <ambientLight intensity={0.5} />
-      <directionalLight position={[2, 2, 2]} intensity={1.5} />
+      <directionalLight position={[10,10,2]} intensity={1.5} />
       <Suspense fallback={null}>
         <Model color={color} />
       </Suspense>

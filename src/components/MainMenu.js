@@ -4,6 +4,7 @@ import MenuItem from './MenuItem';
 
 const MainMenu = ({ onMenuToggle, onColorChange, setActiveColor, setHoverColor }) => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
   const [startX, setStartX] = useState(null);
   const appRef = useRef(null);
 
@@ -14,9 +15,11 @@ const MainMenu = ({ onMenuToggle, onColorChange, setActiveColor, setHoverColor }
   const handleItemClick = (index, color) => {
     const newIndex = index === activeIndex ? null : index;
     setActiveIndex(newIndex);
+    setHoveredIndex(null); // Clear hovered index
     onMenuToggle(newIndex !== null);
     onColorChange(newIndex !== null ? color : null);
     setActiveColor(newIndex !== null ? color : null);
+    setHoverColor(null);  // Clear hover color
   };
 
   const handleTouchStart = (e) => {
@@ -43,30 +46,40 @@ const MainMenu = ({ onMenuToggle, onColorChange, setActiveColor, setHoverColor }
 
   const changeActiveMenu = (newIndex) => {
     if (newIndex < 0 || newIndex >= menuItems.length) return;
-    const color = colors[newIndex];
     setActiveIndex(newIndex);
-    onMenuToggle(true);
-    onColorChange(color);
-    setActiveColor(color);
+    setHoveredIndex(null); // Clear hovered index
+    onMenuToggle(newIndex !== null);
+    onColorChange(newIndex !== null ? colors[newIndex] : null);
+    setActiveColor(newIndex !== null ? colors[newIndex] : null);
+    setHoverColor(null); // Clear hover color when changing active menu
   };
 
   const handleMouseEnter = (index) => {
-    const color = colors[index];
-    setHoverColor(color);
+    if (index !== activeIndex) {
+      setHoveredIndex(index); // Set hovered index
+      setHoverColor(colors[index]);
+    }
   };
 
   const handleMouseLeave = () => {
+    setHoveredIndex(null); // Clear hovered index
     setHoverColor(null);
   };
 
-  const menuItems = ['Menu 1', 'Menu 2', 'Menu 3', 'Menu 4', 'Menu 5', 'Menu 6'];
+  const menuItems = [
+    'MIO PROEPPER',
+    'DISKRIMINIERUNGSKRITISCHES LEKTORAT',
+    'POLITISCHE BILDUNG & BERATUNG',
+    'CONTACT',
+    'IMPRESSUM'
+  ];
+
   const colors = [
     "rgba(57, 255, 20, 1)",
     "rgba(0, 255, 255, 1)",
     "rgba(255, 7, 58, 1)",
     "rgba(255, 0, 255, 1)",
-    "rgba(255, 255, 0, 1)",
-    "rgba(0, 255, 0, 1)"
+    "rgba(255, 255, 0, 1)"
   ];
 
   return (
@@ -82,6 +95,7 @@ const MainMenu = ({ onMenuToggle, onColorChange, setActiveColor, setHoverColor }
           index={index}
           title={title}
           isActive={index === activeIndex}
+          isHovered={index === hoveredIndex && index !== activeIndex}
           onClick={() => handleItemClick(index, colors[index])}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}
